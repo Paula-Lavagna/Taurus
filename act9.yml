@@ -1,0 +1,37 @@
+execution:
+- concurrency: ${__P(concurrency,3)}
+  ramp-up: ${__P(ramp_up,30s)}
+  excecutor: jmeter
+  iterations: ${__P(iterations,1)}
+  hold-for: ${__P(hold_for,1m)}
+  scenario: prueba
+
+scenarios:
+  prueba:
+    variables:
+      prodId: 43
+      quant: 2     
+    requests:
+     - url:  http://opencart.abstracta.us/
+       method: GET
+       label: home
+       assert:
+         - contains:
+           - .+Featured.+
+           subject: body
+           regexp: true
+     - url: http://opencart.abstracta.us/index.php?route=checkout/cart/add
+       method: POST
+       label: addToCart
+       body:
+         product_id: ${prodId}
+         quantity: ${quant}
+       assert:
+         - contains:
+           - .+success.+
+           subject: body
+           regexp: true
+  
+  reporting:
+  - module: passfail
+    criteria: fail>3%
